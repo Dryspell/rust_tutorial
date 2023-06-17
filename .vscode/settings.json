@@ -19,7 +19,11 @@
 		"titleBar.inactiveForeground": "#e7e7e799"
 	},
 	"peacock.color": "#215732",
-	"files.autoSave": "onFocusChange",
+	"files.autoSave": "afterDelay",
+	"files.autoSaveDelay": 1000,
 	"editor.formatOnSave": true,
-	"editor.formatOnSaveMode": "modificationsIfAvailable"
+	"editor.formatOnSaveMode": "file",
+	"rust-analyzer.checkOnSave": true,
+	"rust-analyzer.cargo.buildScripts.overrideCommand": null,
+	"rust-analyzer.check.command": "clippy"
 }
