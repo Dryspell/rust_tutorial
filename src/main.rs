@@ -664,6 +664,134 @@ fn example20_smart_pointers() {
     let b_int1 = Box::new(5);
 }
 
+fn example21_binary_search_tree() {
+    struct BinarySearchTree<T> {
+        root: Option<Box<Node<T>>>,
+    }
+
+    struct Node<T> {
+        pub key: T,
+        pub left: Option<Box<Node<T>>>,
+        pub right: Option<Box<Node<T>>>,
+    }
+
+    impl<T> Node<T> {
+        pub fn new(key: T) -> Self {
+            Node {
+                key,
+                left: None,
+                right: None,
+            }
+        }
+
+        pub fn left(mut self, node: Node<T>) -> Self {
+            self.left = Some(Box::new(node));
+            self
+        }
+
+        pub fn right(mut self, node: Node<T>) -> Self {
+            self.right = Some(Box::new(node));
+            self
+        }
+    }
+
+    let node1 = Node::new(1).left(Node::new(2)).right(Node::new(3));
+
+    // fn insert(&mut self, value: T) {
+    //     if value < self.value {
+    //         match self.left {
+    //             Some(ref mut node) => node.insert(value),
+    //             None => self.left = Some(Box::new(Node::new(value))),
+    //         }
+    //     } else {
+    //         match self.right {
+    //             Some(ref mut node) => node.insert(value),
+    //             None => self.right = Some(Box::new(Node::new(value))),
+    //         }
+    //     }
+    // }
+
+    // fn find(&self, value: T) -> bool {
+    //     if value == self.value {
+    //         return true;
+    //     } else if value < self.value {
+    //         match self.left {
+    //             Some(ref node) => node.find(value),
+    //             None => false,
+    //         }
+    //     } else {
+    //         match self.right {
+    //             Some(ref node) => node.find(value),
+    //             None => false,
+    //         }
+    //     }
+    // }
+}
+
+fn example22_multithreading() {
+    use std::thread;
+    use std::time::Duration;
+
+    let handle = thread::spawn(|| {
+        for i in 1..25 {
+            println!("[spawned] Hi number {} from the spawned thread!", i);
+            thread::sleep(Duration::from_millis(1));
+        }
+    });
+
+    for i in 1..9 {
+        println!("[main] Hi number {} from the main thread!", i);
+        thread::sleep(Duration::from_millis(1));
+    }
+
+    handle.join().unwrap();
+}
+
+fn example23_bank_account() {
+    pub struct Bank {
+        balance: f32,
+    }
+
+    // fn withdraw(bank: &mut Bank, amount: f32) {
+    //     println!("Withdrawing {} from account", amount);
+    //     bank.balance -= amount;
+    // }
+
+    // fn deposit(bank: &mut Bank, amount: f32) {
+    //     println!("Depositing {} into account", amount);
+    //     bank.balance += amount;
+    // }
+
+    // let mut bank = Bank { balance: 100.0 };
+    // withdraw(&mut bank, 10.0);
+    // deposit(&mut bank, 20.0);
+    // println!("Balance: {}", bank.balance);
+
+    use std::cell::RefCell;
+    use std::rc::Rc;
+    use std::sync::{Arc, Mutex};
+
+    /// Notice the error here, we cannot borrow bank as mutable twice, solve with smart pointer
+    /// ```
+    /// use std::thread;
+    /// thread::spawn(|| {
+    ///     withdraw(&mut bank, 10.0);
+    /// })
+    /// .join()
+    /// .unwrap();
+    /// ```
+    fn withdraw(bank: &Arc<Mutex<Bank>>, amount: f32) {
+        let mut bank_ref = bank.lock().unwrap();
+
+        if bank_ref.balance >= amount {
+            println!("Withdrawing {} from account", amount);
+            bank_ref.balance -= amount;
+        } else {
+            println!("Insufficient funds, balance only {}", bank_ref.balance);
+        }
+    }
+}
+
 fn main() {
     // example1_io();
     // example2_io();
@@ -688,8 +816,16 @@ fn main() {
     // example15_structs();
     // example16_modules_and_crates();
 
-    example17_panics_and_errors_and_fs();
-    example18_iterators();
+    // example17_panics_and_errors_and_fs();
+    // example18_iterators();
 
-    example19_closures();
+    // example19_closures();
+
+    // example20_smart_pointers();
+
+    // example21_binary_search_tree();
+
+    // example22_multithreading();
+
+    example23_bank_account();
 }
