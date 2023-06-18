@@ -527,9 +527,141 @@ fn example15_structs() {
             Circle { radius: width }
         }
         fn area(&self) -> f32 {
-            self.radius * self.radius * std::f32::consts::PI
+            self.radius.powf(2.0) * std::f32::consts::PI
         }
     }
+
+    let rec: Rectangle = Shape::new(10.0, Some(10.0));
+    let cir: Circle = Shape::new(10.0, None);
+
+    println!("Rectangle area: {}", rec.area());
+    println!("Circle area: {}", cir.area());
+
+    struct Triangle {
+        base: f32,
+        height: f32,
+    }
+
+    impl Shape for Triangle {
+        fn new(width: f32, height: Option<f32>) -> Self {
+            Triangle {
+                base: width,
+                height: height.unwrap_or(width),
+            }
+        }
+        fn area(&self) -> f32 {
+            self.base * self.height * 0.5
+        }
+    }
+
+    let tri: Triangle = Shape::new(10.0, Some(10.0));
+    println!("Triangle area: {}", tri.area());
+}
+
+mod restaurant;
+fn example16_modules_and_crates() {
+    use crate::restaurant::order_food;
+    order_food();
+}
+
+fn example17_panics_and_errors_and_fs() {
+    // panic!("Crash and burn");
+
+    // let lil_arr = [1, 2, 3];
+    // println!("{}", lil_arr[99]);
+
+    let path = "lines.txt";
+
+    let output = File::create(path);
+    let mut output = match output {
+        Ok(file) => file,
+        Err(error) => panic!("Problem creating the file: {:?}", error),
+    };
+
+    write!(output, "Just some\nRandom Words\n").expect("Failed to write to file");
+
+    let input = File::open(path).unwrap();
+    let buffered = BufReader::new(input);
+    for line in buffered.lines() {
+        println!("{}", line.unwrap());
+    }
+
+    let output2 = File::create("rand.txt");
+    let mut output2 = match output2 {
+        Ok(file) => file,
+        Err(error) => match error.kind() {
+            ErrorKind::NotFound => match File::create("rand.txt") {
+                Ok(fc) => fc,
+                Err(e) => panic!("Problem creating the file: {:?}", e),
+            },
+            other_error => panic!("Problem creating the file: {:?}", other_error),
+        },
+    };
+}
+
+fn example18_iterators() {
+    let v1 = vec![1, 2, 3];
+
+    let v1_iter = v1.iter();
+
+    for val in v1_iter {
+        println!("Got: {}", val);
+    }
+
+    let v2: Vec<_> = v1.iter().map(|x| x + 1).collect();
+
+    println!("{:?}", v2);
+
+    let mut arr_it = [1, 2, 3, 4];
+    for val in arr_it.iter() {
+        println!("Got: {}", val);
+    }
+
+    let mut iter1 = arr_it.iter();
+    println!("1st: {:?}", iter1.next());
+}
+
+fn example19_closures() {
+    let can_vote = |age: i32| -> bool { age >= 18 };
+
+    println!("Can vote: {}", can_vote(20));
+
+    let sum = |x: i32, y: i32| -> i32 { x + y };
+
+    println!("Sum: {}", sum(2, 3));
+
+    let mut sample1 = 5;
+    let print_var = |var: i32| println!("var is {}", var);
+    print_var(sample1);
+
+    sample1 = 10;
+    let mut chang_var = || sample1 += 10;
+    chang_var();
+    print_var(sample1);
+
+    /// notice that this function below cannot reach outside of its body, full dependency injection is required
+    /// The following does not work
+    /// ```
+    /// fn print_sample() {
+    ///     println!("sample1 is {}", sample1);
+    /// }
+    /// ```
+
+    fn use_func<T>(a: i32, b: i32, func: T) -> i32
+    where
+        T: Fn(i32, i32) -> i32,
+    {
+        func(a, b)
+    }
+
+    let sum = |a, b| a + b;
+    println!("5 + 6 = {}", use_func(5, 6, sum));
+    let prod = |a, b| a * b;
+    println!("5 * 6 = {}", use_func(5, 6, prod));
+}
+
+fn example20_smart_pointers() {
+    let b_int1 = Box::new(5);
 }
 
 fn main() {
@@ -552,6 +684,12 @@ fn main() {
 
     // example13_ownership();
 
-    example14_hashmaps();
-    example15_structs();
+    // example14_hashmaps();
+    // example15_structs();
+    // example16_modules_and_crates();
+
+    example17_panics_and_errors_and_fs();
+    example18_iterators();
+
+    example19_closures();
 }
